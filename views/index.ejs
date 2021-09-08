@@ -1,10 +1,26 @@
 <!DOCTYPE html>
+<script src="/socket.io/socket.io.js"></script>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body>
-       <p><%- hoge %></p>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+  </head>
+  <body>
+    <p><%- hoge %></p>
+    <input type="button" value="button" onclick="buttonClick()">
+    <p id="counter"></p>
+    <script>
+      let socket = io();
+
+      function buttonClick(){
+        socket.emit("test", { message: 'test' })
+      }
+
+      socket.on("test2", (data) => {
+        console.log(`type: ${typeof data}   data: ${data.message}`);
+        const counter = document.getElementById('counter')
+        counter.textContent = data.message
+      });
+    </script>
+  </body>
 </html>
