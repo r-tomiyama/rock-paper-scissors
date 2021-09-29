@@ -4,22 +4,68 @@
   <head>
     <meta charset="UTF-8" />
     <title></title>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <p><%- hoge %></p>
-    <input type="button" value="button" onclick="buttonClick()">
-    <p id="counter"></p>
+    <div id="top">
+      <input type="button" value="じゃんけんをする！" onclick="buttonClick()" />
+    </div>
+
+    <p id="fail" class="hidden">じゃんけん部屋は満室のため、参加できません</p>
+
+    <div id="content" class="hidden">
+      <p>じゃんけん mode</p>
+      <p id="wait-player">対戦相手が来るのを待ちます</p>
+      <div id="choose" class="hidden">
+        <p> 対戦相手の準備が整いました！手を選びましょう</p>
+        <input type="button" value="グー" onclick="chooseHand('rock')" />
+        <input type="button" value="チョキ" onclick="chooseHand('scissors')" />
+        <input type="button" value="パー" onclick="chooseHand('paper')" />
+      </div>
+      <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
+      <p id="play" class="hidden">じゃんけんを始めます！</p>
+      <p id="result" class="hidden">結果</p>
+    </div>
+
     <script>
       let socket = io();
 
-      function buttonClick(){
-        socket.emit("test", { message: 'test' })
+      function buttonClick() {
+        socket.emit("join");
       }
 
-      socket.on("test2", (data) => {
-        console.log(`type: ${typeof data}   data: ${data.message}`);
-        const counter = document.getElementById('counter')
-        counter.textContent = data.message
+      function chooseHand(hand) {
+        socket.emit("choose", { hand: hand });
+        document.getElementById("choose").className = "hidden";
+        document.getElementById("wait-to-play").className = undefined;
+      }
+
+      socket.on("joined", () => {
+        document.getElementById("top").className = "hidden";
+        document.getElementById("content").className = undefined;
+      });
+
+      socket.on("FaildeToJoin", () => {
+        document.getElementById("fail").className = undefined;
+      });
+
+      socket.on("start", () => {
+        document.getElementById("wait-player").className = "hidden";
+        document.getElementById("choose").className = undefined;
+      });
+
+      socket.on("done", () => {
+        document.getElementById("wait-to-play").className = "hidden";
+        document.getElementById("result").className = undefined;
+
+        setTimeout(() => {
+          document.getElementById("choose").className = undefined;
+          document.getElementById("result").className = "hidden";
+        }, 5000);
       });
     </script>
   </body>
