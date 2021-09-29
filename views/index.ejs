@@ -28,11 +28,14 @@
       </div>
       <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
       <p id="play" class="hidden">じゃんけんを始めます！</p>
-      <p id="result" class="hidden">結果</p>
+      <p id="draw" class="hidden">引き分けでした</p>
+      <p id="win" class="hidden">勝ったよ！</p>
+      <p id="lose" class="hidden">負けたよ〜</p>
     </div>
 
     <script>
       let socket = io();
+      let id;
 
       function buttonClick() {
         socket.emit("join");
@@ -44,9 +47,10 @@
         document.getElementById("wait-to-play").className = undefined;
       }
 
-      socket.on("joined", () => {
+      socket.on("joined", (data) => {
         document.getElementById("top").className = "hidden";
         document.getElementById("content").className = undefined;
+        id = data.id;
       });
 
       socket.on("FaildeToJoin", () => {
@@ -58,13 +62,24 @@
         document.getElementById("choose").className = undefined;
       });
 
-      socket.on("done", () => {
+      socket.on("done", (data) => {
         document.getElementById("wait-to-play").className = "hidden";
-        document.getElementById("result").className = undefined;
+
+        if (data.isDraw) {
+          document.getElementById("draw").className = undefined;
+        } else {
+          if (data.winner === id) {
+            document.getElementById("win").className = undefined;
+          } else {
+            document.getElementById("lose").className = undefined;
+          }
+        }
 
         setTimeout(() => {
           document.getElementById("choose").className = undefined;
-          document.getElementById("result").className = "hidden";
+          document.getElementById("draw").className = "hidden";
+          document.getElementById("win").className = "hidden";
+          document.getElementById("lose").className = "hidden";
         }, 5000);
       });
     </script>

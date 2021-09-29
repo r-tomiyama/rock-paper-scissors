@@ -14,6 +14,28 @@ const io: socketio.Server = new socketio.Server(server);
 
 let players: Array<Player> = [];
 
+function calc_result(userHand: Hand, opponentHand: Hand): Result {
+  const win_patterns: Array<[Hand, Hand]> = [
+    ["rock", "scissors"],
+    ["paper", "rock"],
+    ["scissors", "paper"],
+  ];
+
+  if (userHand === opponentHand) {
+    return "draw";
+  } else if (
+    win_patterns.reduce(
+      (acc: boolean, pattern: [Hand, Hand]) =>
+        userHand === pattern[0] && opponentHand === pattern[1] ? true : false,
+      false
+    )
+  ) {
+    return "win";
+  } else {
+    return "lose";
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 io.on("connection", (socket: socketio.Socket) => {
   console.log("connect");
@@ -29,7 +51,7 @@ io.on("connection", (socket: socketio.Socket) => {
       players.push({ id: userId });
       isJoined = true;
       console.log(`join成功しました。${players.length}人目の参加者です。`);
-      socket.emit("joined");
+      socket.emit("joined", { id: userId });
 
       if (players.length === 2) {
         io.emit("start");
@@ -40,20 +62,20 @@ io.on("connection", (socket: socketio.Socket) => {
     }
   });
 
-  socket.on("choose", (data: { hand: string }) => {
+  socket.on("choose", (data: { hand: Hand }) => {
     console.log(`${data.hand}が選択されました`);
 
-    const userIndex = players.findIndex((player) => player.id === userId);
-    players[userIndex].hand = data.hand;
+    const user = players[players.findIndex((player) => player.id === userId)];
+    user.hand = data.hand;
 
-    const handCount = players.reduce(
-      (acc: number, player: Player): number => (player.hand ? acc + 1 : acc),
-      0
-    );
+    const opponent = players.filter((player) => player.id !== user.id)[0];
 
-    if (handCount === 2) {
-      // 勝負
-      io.emit("done");
+    if (opponent.hand) {
+      const result = calc_result(user.hand, opponent.hand);
+      io.emit("done", {
+        isDraw: result === "draw",
+        winner: result === "win" ? user.id : opponent.id,
+      });
 
       players.forEach((player) => (player.hand = undefined));
     }
@@ -65,6 +87,8 @@ io.on("connection", (socket: socketio.Socket) => {
     if (isJoined) {
       players = players.filter((player) => player.id === userId);
       console.log(`現在の参加者は${players.length}人です。`);
+      // 確認
+      // 相手の接続が切れたら、画面が戻るようにしたい
     }
   });
 });
@@ -77,7 +101,11 @@ app.get("/", (req: express.Request, res: express.Response) => {
   res.render("./index.ejs");
 });
 
+type Hand = "rock" | "paper" | "scissors";
+
+type Result = "win" | "lose" | "draw";
+
 interface Player {
   id: string;
-  hand?: string;
+  hand?: Hand;
 }
