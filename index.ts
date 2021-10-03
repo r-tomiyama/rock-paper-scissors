@@ -8,6 +8,7 @@ app.set("view engine", "ejs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
 const server = http.createServer(app);
 const io: socketio.Server = new socketio.Server(server);
@@ -16,9 +17,9 @@ let players: Array<Player> = [];
 
 function calc_result(userHand: Hand, opponentHand: Hand): Result {
   const win_patterns: Array<[Hand, Hand]> = [
-    ["rock", "scissors"],
+    ["rock", "scissor"],
     ["paper", "rock"],
-    ["scissors", "paper"],
+    ["scissor", "paper"],
   ];
 
   if (userHand === opponentHand) {
@@ -101,7 +102,7 @@ app.get("/", (req: express.Request, res: express.Response) => {
   res.render("./index.ejs");
 });
 
-type Hand = "rock" | "paper" | "scissors";
+type Hand = "rock" | "paper" | "scissor";
 
 type Result = "win" | "lose" | "draw";
 

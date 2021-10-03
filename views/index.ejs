@@ -3,34 +3,130 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title></title>
+    <title>じゃんけん sisisin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"/>
     <style>
+      h1 {
+        font-size: 3rem;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      p {
+        font-size: 1.5rem;
+      }
+
+      a {
+        color: lightskyblue;
+      }
+
+      #wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        height: 15vh;
+        background-color: powderblue;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 5vh;
+      }
+
+      #content {
+        margin: 0 5vw;
+      }
+
+      #top {
+        display: flex;
+        justify-content: center;
+      }
+
+      #top .start-button {
+        font-size: 2rem;
+        font-weight: bold;
+        padding: 3vh 5vw;
+        border-radius: 75px;
+        background-color: slategray;
+        color: snow;
+      }
+
+      #message {
+        margin: 2vh 0;
+        text-decoration: underline;
+        margin: 2vh 0;
+      }
+
+      #game-content {
+        color: slategray;
+        display: flex;
+        justify-content: space-between;
+        margin: 5vh 0;
+      }
+
+      #game-content p {
+        text-align: center;
+        font-weight: bold;
+      }
+
+      #game-content img {
+        width: 90%;
+      }
+
+      footer {
+        margin: auto 1vw 1vw 2vh;
+        font-size: 1rem;
+        color: slategray;
+      }
+
       .hidden {
-        display: none;
+        display: none !important;
       }
     </style>
   </head>
   <body>
-    <div id="top">
-      <input type="button" value="じゃんけんをする！" onclick="buttonClick()" />
-    </div>
+    <div id="wrapper">
+      <header>
+        <h1>じゃんけん sisisin</h1>
+      </header>
 
-    <p id="fail" class="hidden">じゃんけん部屋は満室のため、参加できません</p>
+      <div id="content">
+        <div id="message">
+          <p id="fail" class="hidden">じゃんけん部屋は満室のため、参加できません</p>
+          <p id="wait-player" class="hidden">対戦相手が来るのを待ちます</p>
+          <p id="choose" class="hidden">対戦相手の準備が整いました！手を選びましょう</p>
+          <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
+          <p id="play" class="hidden">じゃんけんを始めます！</p>
+          <p id="draw" class="hidden">引き分けでした</p>
+          <p id="win" class="hidden">勝ったよ！</p>
+          <p id="lose" class="hidden">負けたよ〜</p>
+        </div>
 
-    <div id="content" class="hidden">
-      <p>じゃんけん mode</p>
-      <p id="wait-player">対戦相手が来るのを待ちます</p>
-      <div id="choose" class="hidden">
-        <p> 対戦相手の準備が整いました！手を選びましょう</p>
-        <input type="button" value="グー" onclick="chooseHand('rock')" />
-        <input type="button" value="チョキ" onclick="chooseHand('scissors')" />
-        <input type="button" value="パー" onclick="chooseHand('paper')" />
+        <div id="top">
+          <input type="button" value="じゃんけんをする！" class="start-button" onclick="buttonClick()" />
+        </div>
+
+        <div id="game-content" class="hidden">
+          <div>
+            <img src="../images/rock.jpg" onclick="chooseHand('rock')" />
+            <p>グー</p>
+          </div>
+          <div>
+            <img src="../images/scissor.jpg" onclick="chooseHand('scissors')" />
+            <p>チョキ</p>
+          </div>
+          <div>
+            <img src="../images/paper.jpg" onclick="chooseHand('paper')" />
+            <p>パー</p>
+          </div>
+        </div>
       </div>
-      <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
-      <p id="play" class="hidden">じゃんけんを始めます！</p>
-      <p id="draw" class="hidden">引き分けでした</p>
-      <p id="win" class="hidden">勝ったよ！</p>
-      <p id="lose" class="hidden">負けたよ〜</p>
+
+      <footer>
+        <a href="https://www.pixiv.net/artworks/91732589" target="_blank">sisisin画像</a> Ⓒ sisisin CC BY-SA 4.0ライセンス
+      </footer>
     </div>
 
     <script>
@@ -49,7 +145,7 @@
 
       socket.on("joined", (data) => {
         document.getElementById("top").className = "hidden";
-        document.getElementById("content").className = undefined;
+        document.getElementById("wait-player").className = undefined;
         id = data.id;
       });
 
@@ -60,6 +156,7 @@
       socket.on("start", () => {
         document.getElementById("wait-player").className = "hidden";
         document.getElementById("choose").className = undefined;
+        document.getElementById("game-content").className = undefined;
       });
 
       socket.on("done", (data) => {
