@@ -95,6 +95,7 @@
       <div id="content">
         <div id="message">
           <p id="fail" class="hidden">じゃんけん部屋は満室のため、参加できません</p>
+          <p id="reset" class="hidden">対戦相手がいなくなりました。次の対戦相手が来るのを待ちます</p>
           <p id="wait-player" class="hidden">対戦相手が来るのを待ちます</p>
           <p id="choose" class="hidden">対戦相手の準備が整いました！手を選びましょう</p>
           <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
@@ -149,12 +150,24 @@
         id = data.id;
       });
 
+      socket.on("reset", () => {
+        document.getElementById("wait-to-play").className = "hidden";
+        document.getElementById("choose").className = "hidden";
+
+        document.getElementById("draw").className = "hidden";
+        document.getElementById("win").className = "hidden";
+        document.getElementById("lose").className = "hidden";
+
+        document.getElementById("reset").className = undefined;
+      });
+
       socket.on("FaildeToJoin", () => {
         document.getElementById("fail").className = undefined;
       });
 
       socket.on("start", () => {
         document.getElementById("wait-player").className = "hidden";
+        document.getElementById("reset").className = "hidden";
         document.getElementById("choose").className = undefined;
         document.getElementById("game-content").className = undefined;
       });

@@ -88,8 +88,8 @@ io.on("connection", (socket: socketio.Socket) => {
     if (isJoined) {
       players = players.filter((player) => player.id === userId);
       console.log(`現在の参加者は${players.length}人です。`);
-      // 確認
-      // 相手の接続が切れたら、画面が戻るようにしたい
+
+      io.emit("reset");
     }
   });
 });
