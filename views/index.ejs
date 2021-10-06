@@ -143,6 +143,7 @@
     <script>
       let socket = io();
       let id;
+      let existOpponent = false;
 
       function buttonClick() {
         socket.emit("join");
@@ -158,6 +159,7 @@
           document.getElementById("game-content").className = "hidden";
         } else if (mode === "waiting") {
           document.getElementById("top").className = "hidden";
+          document.getElementById("game-content").className = "hidden";
         } else if (mode === "playing") {
           document.getElementById("game-content").className = undefined;
         } else {
@@ -183,8 +185,9 @@
         // TODO: アニメーションつけたい
       }
 
-      socket.on("reset", () => {
-        changeView("top");
+      socket.on("opponent-disconnect", () => {
+        existOpponent = false;
+        changeView("waiting");
         resetGame();
         updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
       });
@@ -200,6 +203,7 @@
       });
 
       socket.on("start", () => {
+        existOpponent = true;
         changeView("playing");
         updateMessage("対戦相手の準備が整いました！sisisinを選びましょう");
       });
@@ -224,10 +228,10 @@
         updateMessage(`${result}しました！ゲームを終了する場合はブラウザを閉じてください。`);
 
         setTimeout(() => {
-          resetGame();
-
-          // TODO: 相手がいなくなっていない場合にだけ表示させる
-          updateMessage("次のゲームを始めます！sisisinを選びましょう。");
+          if (existOpponent) {
+            resetGame();
+            updateMessage("次のゲームを始めます！sisisinを選びましょう。");
+          }
         }, 5000);
       });
     </script>

@@ -61,7 +61,10 @@ io.on("connection", (socket: socketio.Socket) => {
       }
     } else {
       console.log("満員のため、joinできません。");
-      socket.emit("FaildeToJoin");
+      socket.emit("error", {
+        message:
+          "じゃんけん部屋は満室のため、参加できません。時間を空けてからまた参加しましょう。",
+      });
     }
   });
 
@@ -92,7 +95,7 @@ io.on("connection", (socket: socketio.Socket) => {
       players = players.filter((player) => player.id === userId);
       console.log(`現在の参加者は${players.length}人です。`);
 
-      io.emit("reset");
+      io.emit("opponent-disconnect");
     }
   });
 });
