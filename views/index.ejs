@@ -107,17 +107,7 @@
       </header>
 
       <div id="content">
-        <div id="message">
-          <p id="fail" class="hidden">じゃんけん部屋は満室のため、参加できません</p>
-          <p id="reset" class="hidden">対戦相手がいなくなりました。次の対戦相手が来るのを待ちます</p>
-          <p id="wait-player" class="hidden">対戦相手が来るのを待ちます</p>
-          <p id="choose" class="hidden">対戦相手の準備が整いました！手を選びましょう</p>
-          <p id="wait-to-play" class="hidden">対戦相手が手を選ぶのを待ちます</p>
-          <p id="play" class="hidden">じゃんけんを始めます！</p>
-          <p id="draw" class="hidden">引き分けでした</p>
-          <p id="win" class="hidden">勝ったよ！</p>
-          <p id="lose" class="hidden">負けたよ〜</p>
-        </div>
+        <p id="message"></p>
 
         <div id="top">
           <input type="button" value="じゃんけんをする！" class="start-button" onclick="buttonClick()" />
@@ -158,24 +148,24 @@
         socket.emit("join");
       }
 
-      function chooseHand(hand) {
-        socket.emit("choose", { hand: hand });
-        document.getElementById("choose").className = "hidden";
-        document.getElementById("wait-to-play").className = undefined;
+      function updateMessage(message) {
+        document.getElementById("message").innerText = message;
+      }
 
-        document.getElementById(hand).className = "selected";
-        // TODO: アニメーションつけたい
-
-        ["rock", "scissor", "paper"].filter(h => (h !== hand)).forEach(h => {
-          document.getElementById(h).className = undefined;
-        });
+      function changeView(mode) {
+        if (mode === "top") {
+          document.getElementById("top").className = undefined;
+          document.getElementById("game-content").className = "hidden";
+        } else if (mode === "waiting") {
+          document.getElementById("top").className = "hidden";
+        } else if (mode === "playing") {
+          document.getElementById("game-content").className = undefined;
+        } else {
+          // TODO
+        }
       }
 
       function resetGame() {
-        document.getElementById("draw").className = "hidden";
-        document.getElementById("win").className = "hidden";
-        document.getElementById("lose").className = "hidden";
-
         ["rock", "scissor", "paper"].forEach(h => {
           document.getElementById(h).className = undefined;
         });
@@ -184,58 +174,60 @@
         for (var i = 0; opponentHands.length; i++) {
           opponentHands[i].remove();
         }
-
       }
 
+      function chooseHand(hand) {
+        socket.emit("choose", { hand: hand });
+        updateMessage("対戦相手がsisisinを選ぶのを待ちます");
+        document.getElementById(hand).className = "selected";
+        // TODO: アニメーションつけたい
+      }
+
+      socket.on("reset", () => {
+        changeView("top");
+        resetGame();
+        updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
+      });
+
+      socket.on("error", (data) => {
+        updateMessage(data.message);
+      });
+
       socket.on("joined", (data) => {
-        document.getElementById("top").className = "hidden";
-        document.getElementById("wait-player").className = undefined;
+        changeView("waiting");
+        updateMessage("じゃんけんルームに入りました。対戦相手が来るのを待ちます。");
         id = data.id;
       });
 
-      socket.on("reset", () => {
-        document.getElementById("wait-to-play").className = "hidden";
-        document.getElementById("choose").className = "hidden";
-        document.getElementById("game-content").className = "hidden";
-        resetGame();
-        document.getElementById("reset").className = undefined;
-      });
-
-      socket.on("FaildeToJoin", () => {
-        document.getElementById("fail").className = undefined;
-      });
-
       socket.on("start", () => {
-        document.getElementById("wait-player").className = "hidden";
-        document.getElementById("reset").className = "hidden";
-        document.getElementById("choose").className = undefined;
-        document.getElementById("game-content").className = undefined;
+        changeView("playing");
+        updateMessage("対戦相手の準備が整いました！sisisinを選びましょう");
       });
 
       socket.on("done", (data) => {
-        document.getElementById("wait-to-play").className = "hidden";
-
         let pOpponentHand = document.createElement('p')
         pOpponentHand.innerText = "相手プレイヤーのsisisin"
         pOpponentHand.className = "opponent-selected";
         document.getElementById(`${data.opponentHand}-wrapper`).appendChild(pOpponentHand)
 
         // TODO: 結果表示にアニメーションつけたい
+        let result;
         if (data.isDraw) {
-          document.getElementById("draw").className = undefined;
+          result = "引き分け";
         } else {
           if (data.winner === id) {
-            document.getElementById("win").className = undefined;
+            result = "勝利";
           } else {
-            document.getElementById("lose").className = undefined;
+            result = "敗北";
           }
         }
+        updateMessage(`${result}しました！ゲームを終了する場合はブラウザを閉じてください。`);
 
         setTimeout(() => {
           resetGame();
 
           // TODO: 相手がいなくなっていない場合にだけ表示させる
-          document.getElementById("choose").className = undefined;
+          updateMessage("次のゲームを始めます！sisisinを選びましょう。");
         }, 5000);
       });
     </script>
