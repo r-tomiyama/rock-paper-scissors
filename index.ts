@@ -45,6 +45,8 @@ io.on("connection", (socket: socketio.Socket) => {
 
   let isJoined = false;
 
+  // TODO: 例外復帰
+
   socket.on("join", () => {
     console.log("join申請");
 
@@ -76,6 +78,7 @@ io.on("connection", (socket: socketio.Socket) => {
       io.emit("done", {
         isDraw: result === "draw",
         winner: result === "win" ? user.id : opponent.id,
+        opponentHand: opponent.hand,
       });
 
       players.forEach((player) => (player.hand = undefined));

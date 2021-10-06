@@ -61,19 +61,21 @@
       }
 
       #game-content {
-        color: slategray;
         display: flex;
         justify-content: space-between;
         margin: 5vh 0;
       }
 
-      #game-content p {
+      #game-content .hand-label {
+        margin: -4vh 0 4vh 0;
         text-align: center;
         font-weight: bold;
       }
 
       #game-content img {
         width: 90%;
+        display: block;
+        margin: 4vh auto 0 auto;
       }
 
       footer {
@@ -85,6 +87,17 @@
       .hidden {
         display: none !important;
       }
+
+      .selected {
+        border:khaki 10px solid;
+        border-radius: 30px;
+      }
+
+      .opponent-selected {
+        margin: 3vh 0;
+        text-align: center;
+      }
+
     </style>
   </head>
   <body>
@@ -111,17 +124,23 @@
         </div>
 
         <div id="game-content" class="hidden">
-          <div>
-            <img src="../images/rock.jpg" onclick="chooseHand('rock')" />
-            <p>グー</p>
+          <div id="rock-wrapper">
+            <div id="rock">
+              <img src="../images/rock.jpg" onclick="chooseHand('rock')" />
+              <p class="hand-label">グー</p>
+            </div>
           </div>
-          <div>
-            <img src="../images/scissor.jpg" onclick="chooseHand('scissors')" />
-            <p>チョキ</p>
+          <div id="scissor-wrapper">
+            <div id="scissor">
+              <img src="../images/scissor.jpg" onclick="chooseHand('scissor')" />
+              <p class="hand-label">チョキ</p>
+            </div>
           </div>
-          <div>
-            <img src="../images/paper.jpg" onclick="chooseHand('paper')" />
-            <p>パー</p>
+          <div id="paper-wrapper">
+            <div id="paper">
+              <img src="../images/paper.jpg" onclick="chooseHand('paper')" />
+              <p class="hand-label">パー</p>
+            </div>
           </div>
         </div>
       </div>
@@ -143,6 +162,29 @@
         socket.emit("choose", { hand: hand });
         document.getElementById("choose").className = "hidden";
         document.getElementById("wait-to-play").className = undefined;
+
+        document.getElementById(hand).className = "selected";
+        // TODO: アニメーションつけたい
+
+        ["rock", "scissor", "paper"].filter(h => (h !== hand)).forEach(h => {
+          document.getElementById(h).className = undefined;
+        });
+      }
+
+      function resetGame() {
+        document.getElementById("draw").className = "hidden";
+        document.getElementById("win").className = "hidden";
+        document.getElementById("lose").className = "hidden";
+
+        ["rock", "scissor", "paper"].forEach(h => {
+          document.getElementById(h).className = undefined;
+        });
+
+        const opponentHands = document.getElementsByClassName("opponent-selected")
+        for (var i = 0; opponentHands.length; i++) {
+          opponentHands[i].remove();
+        }
+
       }
 
       socket.on("joined", (data) => {
@@ -154,11 +196,8 @@
       socket.on("reset", () => {
         document.getElementById("wait-to-play").className = "hidden";
         document.getElementById("choose").className = "hidden";
-
-        document.getElementById("draw").className = "hidden";
-        document.getElementById("win").className = "hidden";
-        document.getElementById("lose").className = "hidden";
-
+        document.getElementById("game-content").className = "hidden";
+        resetGame();
         document.getElementById("reset").className = undefined;
       });
 
@@ -176,6 +215,12 @@
       socket.on("done", (data) => {
         document.getElementById("wait-to-play").className = "hidden";
 
+        let pOpponentHand = document.createElement('p')
+        pOpponentHand.innerText = "相手プレイヤーのsisisin"
+        pOpponentHand.className = "opponent-selected";
+        document.getElementById(`${data.opponentHand}-wrapper`).appendChild(pOpponentHand)
+
+        // TODO: 結果表示にアニメーションつけたい
         if (data.isDraw) {
           document.getElementById("draw").className = undefined;
         } else {
@@ -187,10 +232,10 @@
         }
 
         setTimeout(() => {
+          resetGame();
+
+          // TODO: 相手がいなくなっていない場合にだけ表示させる
           document.getElementById("choose").className = undefined;
-          document.getElementById("draw").className = "hidden";
-          document.getElementById("win").className = "hidden";
-          document.getElementById("lose").className = "hidden";
         }, 5000);
       });
     </script>
