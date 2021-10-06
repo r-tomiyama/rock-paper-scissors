@@ -43,6 +43,7 @@
       #top {
         display: flex;
         justify-content: center;
+        margin: 10vh 0;
       }
 
       #top .start-button {
@@ -247,6 +248,14 @@
           resetGame();
           updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
         }
+      });
+
+      socket.on("reset-room", (data) => {
+        isJoined = false;
+        existOpponent = false;
+        resetGame();
+        changeView("top");
+        updateMessage(data.message);
       });
     </script>
   </body>
