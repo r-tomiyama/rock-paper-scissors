@@ -182,8 +182,14 @@
       function chooseHand(hand) {
         socket.emit("choose", { hand: hand });
         updateMessage("対戦相手がsisisinを選ぶのを待ちます");
-        document.getElementById(hand).className = "selected";
-        // TODO: アニメーションつけたい
+        ["rock", "paper", "scissor"].forEach(v => {
+          if(v === hand) {
+            document.getElementById(v).className = "selected";
+            // TODO: アニメーションつけたい
+          } else {
+            document.getElementById(v).className = undefined;
+          }
+        })
       }
 
       socket.on("error", (data) => {
