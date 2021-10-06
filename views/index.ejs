@@ -143,6 +143,7 @@
     <script>
       let socket = io();
       let id;
+      let isJoined = false;
       let existOpponent = false;
 
       function buttonClick() {
@@ -185,13 +186,6 @@
         // TODO: アニメーションつけたい
       }
 
-      socket.on("opponent-disconnect", () => {
-        existOpponent = false;
-        changeView("waiting");
-        resetGame();
-        updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
-      });
-
       socket.on("error", (data) => {
         updateMessage(data.message);
       });
@@ -200,39 +194,53 @@
         changeView("waiting");
         updateMessage("じゃんけんルームに入りました。対戦相手が来るのを待ちます。");
         id = data.id;
+        isJoined = true;
       });
 
       socket.on("start", () => {
-        existOpponent = true;
-        changeView("playing");
-        updateMessage("対戦相手の準備が整いました！sisisinを選びましょう");
+        if(isJoined) {
+          existOpponent = true;
+          changeView("playing");
+          updateMessage("対戦相手の準備が整いました！sisisinを選びましょう");
+        }
       });
 
       socket.on("done", (data) => {
-        let pOpponentHand = document.createElement('p')
-        pOpponentHand.innerText = "相手プレイヤーのsisisin"
-        pOpponentHand.className = "opponent-selected";
-        document.getElementById(`${data.opponentHand}-wrapper`).appendChild(pOpponentHand)
+        if(isJoined) {
+          let pOpponentHand = document.createElement('p')
+          pOpponentHand.innerText = "相手プレイヤーのsisisin"
+          pOpponentHand.className = "opponent-selected";
+          document.getElementById(`${data.opponentHand}-wrapper`).appendChild(pOpponentHand)
 
-        // TODO: 結果表示にアニメーションつけたい
-        let result;
-        if (data.isDraw) {
-          result = "引き分け";
-        } else {
-          if (data.winner === id) {
-            result = "勝利";
+          // TODO: 結果表示にアニメーションつけたい
+          let result;
+          if (data.isDraw) {
+            result = "引き分け";
           } else {
-            result = "敗北";
+            if (data.winner === id) {
+              result = "勝利";
+            } else {
+              result = "敗北";
+            }
           }
-        }
-        updateMessage(`${result}しました！ゲームを終了する場合はブラウザを閉じてください。`);
+          updateMessage(`${result}しました！ゲームを終了する場合はブラウザを閉じてください。`);
 
-        setTimeout(() => {
-          if (existOpponent) {
-            resetGame();
-            updateMessage("次のゲームを始めます！sisisinを選びましょう。");
-          }
-        }, 5000);
+          setTimeout(() => {
+            if (existOpponent) {
+              resetGame();
+              updateMessage("次のゲームを始めます！sisisinを選びましょう。");
+            }
+          }, 5000);
+        }
+      });
+
+      socket.on("opponent-disconnect", () => {
+        if(isJoined) {
+          existOpponent = false;
+          changeView("waiting");
+          resetGame();
+          updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
+        }
       });
     </script>
   </body>
