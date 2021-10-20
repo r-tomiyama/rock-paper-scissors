@@ -31,11 +31,9 @@ function calc_result(userHand, opponentHand) {
   if (userHand === opponentHand) {
     return "draw";
   } else if (
-    win_patterns.reduce(function (acc, pattern) {
-      return userHand === pattern[0] && opponentHand === pattern[1]
-        ? true
-        : false;
-    }, false)
+    win_patterns.some(function (pattern) {
+      return userHand === pattern[0] && opponentHand === pattern[1];
+    })
   ) {
     return "win";
   } else {
@@ -44,10 +42,9 @@ function calc_result(userHand, opponentHand) {
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 io.on("connection", function (socket) {
-  console.log("connect");
-
   var userId = Math.random().toString(32).substring(2);
   var isJoined = false;
+  console.log(userId + " connect");
 
   function resetRoom() {
     players = [];
@@ -102,6 +99,7 @@ io.on("connection", function (socket) {
 
       if (opponent.hand) {
         var result = calc_result(user_1.hand, opponent.hand);
+        console.log(user_1.id + ": " + result);
         io.emit("done", {
           isDraw: result === "draw",
           winner: result === "win" ? user_1.id : opponent.id,
