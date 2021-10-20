@@ -8,8 +8,8 @@
   "description": "PvPでじゃんけんができる",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "start:local": "ts-node index.ts",
+    "start:prod": "node index.js",
+    "start": "ts-node index.ts",
     "fix": "run-p fix:*",
     "fix:eslint": "npm run lint:eslint -- --fix",
     "fix:prettier": "npm run lint:prettier -- --write",
