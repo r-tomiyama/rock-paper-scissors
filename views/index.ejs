@@ -98,13 +98,33 @@
       }
 
       .selected {
-        border:khaki 10px solid;
+        border: #c0c6c9 10px solid;
         border-radius: 30px;
       }
 
       .opponent-selected {
         margin: 3vh 0;
         text-align: center;
+      }
+
+      .star {
+        animation: kirakira 8s linear;
+        color: khaki;
+        display: inline-block;
+        height: 1em;
+        line-height: 1em;
+        position: fixed;
+        top: -1em;
+        z-index: 1000;
+      }
+
+      @keyframes kirakira {
+          0% {
+              transform:translateY(0) rotateY(0);
+          }
+          100% {
+              transform:translateY(calc(500vh + 1em)) rotateY(3600deg);
+          }
       }
 
     </style>
@@ -155,6 +175,29 @@
       let isJoined = false;
       let existOpponent = false;
       let isPalying = false;
+
+      //星を作る関数。n は星の個数。多いほど星が多く振ります。
+      function starMaker(n) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = "★";
+
+        for (let i = 0; i < n; i++) {
+          starSet(star);
+        }
+      }
+
+      //星のセッティングをする関数。
+      function starSet(clone) {
+        const starClone = clone.cloneNode(true);
+        const starStyle = starClone.style;
+
+        //星の位置（left）、アニメーションの遅延時間（animation-delay）、サイズ（font-size）をランダムで指定
+        starStyle.left = 100 * Math.random() + "%";
+        starStyle.animationDelay = 2 * Math.random() + "s";
+        starStyle.fontSize = ~~(50 * Math.random() + 20) + "px";
+        document.body.appendChild(starClone);
+      }
 
       function buttonClick() {
         socket.emit("join");
@@ -231,13 +274,13 @@
           pOpponentHand.className = "opponent-selected";
           document.getElementById(`${data.opponentHand}-wrapper`).appendChild(pOpponentHand)
 
-          // TODO: 結果表示にアニメーションつけたい
           let result;
           if (data.isDraw) {
             result = "引き分け";
           } else {
             if (data.winner === id) {
               result = "勝利";
+              starMaker(30);
             } else {
               result = "敗北";
             }
