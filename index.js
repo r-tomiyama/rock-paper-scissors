@@ -137,8 +137,10 @@ io.on("connection", function (socket) {
     }
   });
 });
-server.listen(3000, function () {
-  console.log("Start on port 3000.");
+
+var port = process.env.PORT || 3000;
+server.listen(port, function () {
+  console.log("Start on port " + port + ".");
 });
 app.get("/", function (req, res) {
   res.render("./index.ejs");

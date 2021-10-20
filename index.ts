@@ -120,8 +120,9 @@ io.on("connection", (socket: socketio.Socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Start on port 3000.");
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log(`Start on port ${port}.`);
 });
 
 app.get("/", (req: express.Request, res: express.Response) => {
