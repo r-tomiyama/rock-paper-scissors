@@ -145,7 +145,7 @@ io.on("connection", function (socket) {
     try {
       if (isJoined) {
         players = players.filter(function (player) {
-          return player.id === userId;
+          return player.id !== userId;
         });
         console.log(
           "\u73FE\u5728\u306E\u53C2\u52A0\u8005\u306F" +

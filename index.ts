@@ -124,7 +124,7 @@ io.on("connection", (socket: socketio.Socket) => {
 
     try {
       if (isJoined) {
-        players = players.filter((player) => player.id === userId);
+        players = players.filter((player) => player.id !== userId);
         console.log(`現在の参加者は${players.length}人です。`);
 
         io.emit("opponent-disconnect");
