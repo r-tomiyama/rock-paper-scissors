@@ -266,12 +266,14 @@
       });
 
       socket.on("reset-room", (data) => {
-        isJoined = false;
-        existOpponent = false;
-        isPalying = false;
-        clearGame();
-        changeView("top");
-        updateMessage(data.message);
+        if(isJoined) {
+          isJoined = false;
+          existOpponent = false;
+          isPalying = false;
+          clearGame();
+          changeView("top");
+          updateMessage(data.message);
+        }
       });
     </script>
   </body>

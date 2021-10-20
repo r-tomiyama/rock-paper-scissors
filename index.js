@@ -48,6 +48,15 @@ io.on("connection", function (socket) {
 
   function resetRoom() {
     players = [];
+    console.log(
+      "\u73FE\u5728\u306E\u53C2\u52A0\u8005\u306F" +
+        players.length +
+        "\u4EBA\u3067\u3059\u3002"
+    );
+  }
+
+  function backTop() {
+    resetRoom();
     io.emit("reset-room", {
       message: "エラーが発生したため、トップページに戻ります。",
     });
@@ -68,6 +77,22 @@ io.on("connection", function (socket) {
 
         if (players.length === 2) {
           io.emit("start");
+          setTimeout(function () {
+            console.log("部屋が立ち上がって30分経過");
+
+            if (
+              players.some(function (player) {
+                return player.id === userId;
+              })
+            ) {
+              console.log("部屋を解散させる");
+              resetRoom();
+              io.emit("reset-room", {
+                message:
+                  "最初にルームにユーザーが入ってから30分経過しました。利用時間を過ぎたため一度、トップページに戻ります。",
+              });
+            }
+          }, 1000 * 60 * 30);
         }
       } else {
         console.log("満員のため、joinできません。");
@@ -77,7 +102,7 @@ io.on("connection", function (socket) {
         });
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });
@@ -110,7 +135,7 @@ io.on("connection", function (socket) {
         });
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });
@@ -130,7 +155,7 @@ io.on("connection", function (socket) {
         io.emit("opponent-disconnect");
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });

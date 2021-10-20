@@ -45,6 +45,11 @@ io.on("connection", (socket: socketio.Socket) => {
 
   function resetRoom() {
     players = [];
+    console.log(`現在の参加者は${players.length}人です。`);
+  }
+
+  function backTop() {
+    resetRoom();
     io.emit("reset-room", {
       message: "エラーが発生したため、トップページに戻ります。",
     });
@@ -62,6 +67,18 @@ io.on("connection", (socket: socketio.Socket) => {
 
         if (players.length === 2) {
           io.emit("start");
+          setTimeout(() => {
+            console.log("部屋が立ち上がって30分経過");
+
+            if (players.some((player) => player.id === userId)) {
+              console.log("部屋を解散させる");
+              resetRoom();
+              io.emit("reset-room", {
+                message:
+                  "最初にルームにユーザーが入ってから30分経過しました。利用時間を過ぎたため一度、トップページに戻ります。",
+              });
+            }
+          }, 1000 * 60 * 30);
         }
       } else {
         console.log("満員のため、joinできません。");
@@ -71,7 +88,7 @@ io.on("connection", (socket: socketio.Socket) => {
         });
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });
@@ -97,7 +114,7 @@ io.on("connection", (socket: socketio.Socket) => {
         players.forEach((player) => (player.hand = undefined));
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });
@@ -113,7 +130,7 @@ io.on("connection", (socket: socketio.Socket) => {
         io.emit("opponent-disconnect");
       }
     } catch (e) {
-      resetRoom();
+      backTop();
       console.error(e);
     }
   });

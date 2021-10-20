@@ -9,5 +9,6 @@ npm start
 
 ```
 npx tsc
+npm run fix
 git push heroku mater
 ```
