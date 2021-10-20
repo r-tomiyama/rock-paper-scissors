@@ -154,6 +154,7 @@
       let id;
       let isJoined = false;
       let existOpponent = false;
+      let isPalying = false;
 
       function buttonClick() {
         socket.emit("join");
@@ -177,7 +178,7 @@
         }
       }
 
-      function resetGame() {
+      function clearGame() {
         ["rock", "scissor", "paper"].forEach(h => {
           document.getElementById(h).className = undefined;
         });
@@ -189,16 +190,18 @@
       }
 
       function chooseHand(hand) {
-        socket.emit("choose", { hand: hand });
-        updateMessage("対戦相手がsisisinを選ぶのを待ちます");
-        ["rock", "paper", "scissor"].forEach(v => {
-          if(v === hand) {
-            document.getElementById(v).className = "selected";
-            // TODO: アニメーションつけたい
-          } else {
-            document.getElementById(v).className = undefined;
-          }
-        })
+        if (isPalying) {
+          socket.emit("choose", { hand: hand });
+          updateMessage("対戦相手がsisisinを選ぶのを待ちます");
+          ["rock", "paper", "scissor"].forEach(v => {
+            if(v === hand) {
+              document.getElementById(v).className = "selected";
+              // TODO: アニメーションつけたい
+            } else {
+              document.getElementById(v).className = undefined;
+            }
+          })
+        }
       }
 
       socket.on("error", (data) => {
@@ -215,6 +218,7 @@
       socket.on("start", () => {
         if(isJoined) {
           existOpponent = true;
+          isPalying = true;
           changeView("playing");
           updateMessage("対戦相手の準備が整いました！sisisinを選びましょう");
         }
@@ -238,12 +242,14 @@
               result = "敗北";
             }
           }
+          isPalying = false;
           updateMessage(`${result}しました！ゲームを終了する場合はブラウザを閉じてください。`);
 
           setTimeout(() => {
             if (existOpponent) {
-              resetGame();
+              clearGame();
               updateMessage("次のゲームを始めます！sisisinを選びましょう。");
+              isPalying = true;
             }
           }, 5000);
         }
@@ -252,8 +258,9 @@
       socket.on("opponent-disconnect", () => {
         if(isJoined) {
           existOpponent = false;
+          isPalying = false;
           changeView("waiting");
-          resetGame();
+          clearGame();
           updateMessage("対戦相手がいなくなりました。次の対戦相手が来るのを待ちます。");
         }
       });
@@ -261,7 +268,8 @@
       socket.on("reset-room", (data) => {
         isJoined = false;
         existOpponent = false;
-        resetGame();
+        isPalying = false;
+        clearGame();
         changeView("top");
         updateMessage(data.message);
       });
